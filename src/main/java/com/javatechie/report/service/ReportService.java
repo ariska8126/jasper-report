@@ -19,15 +19,20 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Resource;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 public class ReportService {
 
     @Autowired
     private EmployeeRepository repository;
+
+    @Value("classpath:/mii-logo.png")
+    Resource image;
 
     @Autowired
     private AttendanceRepository attendanceRepository;
@@ -72,7 +77,7 @@ public class ReportService {
 
     public byte[] getReportXlsx(List<Report> attendances, String id, String name, String div,
             String periode) throws RuntimeException, FileNotFoundException, JRException {
-        
+
         File file = ResourceUtils.getFile("classpath:employees.jrxml");
 
         JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
@@ -84,6 +89,7 @@ public class ReportService {
         parameters.put("username", name);
         parameters.put("division", div);
         parameters.put("periode", periode);
+        parameters.put("image", image);
 
         JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
 

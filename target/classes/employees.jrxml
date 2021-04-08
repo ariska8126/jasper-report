@@ -187,7 +187,7 @@
     </columnHeader>
     <detail>
         <band height="20">
-            <textField pattern="yyyy-mm-dd" isBlankWhenNull="true">
+            <textField pattern="dd MMMM yyyy" isBlankWhenNull="true">
                 <reportElement style="Detail" positionType="Float" x="0" y="-80" width="92" height="20" uuid="fd604b05-4b47-4887-ba0f-ceadee87054e">
                     <property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a79430c4-7d32-42c5-830c-1b8caaf8db49"/>
                 </reportElement>
