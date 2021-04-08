@@ -59,26 +59,11 @@ public class SpringBootJasperReportApplication {
     private static final String USERNAME = "root";
     private static final String PASSWORD = "Metrodata.5";
 
-//    @GetMapping(value = "/employeeReport.xlsx", produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-//    @ResponseBody
-//    public HttpEntity<byte[]> getEmployeeReportXlsx(final HttpServletResponse response) throws RuntimeException {
-//        final AttendanceReport report = new AttendanceReport(attendanceRepository.findAll());
-//        final byte[] data = reportService.getReportXlsx(report.getReport());
-//
-//        HttpHeaders header = new HttpHeaders();
-//        header.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
-//        header.set(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=attendanceReport.xlsx");
-//        header.setContentLength(data.length);
-//
-//        return new HttpEntity<byte[]>(data, header);
-//    }
-//    @GetMapping("/getAttendancenew/{userId}")
     @GetMapping(value = "/getAttendancenew/{userId}", produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     @ResponseBody
     public HttpEntity<byte[]> getReportXlsx(@PathVariable String userId,
             final HttpServletResponse response) throws RuntimeException,
             JsonProcessingException, FileNotFoundException, JRException {
-//    public String getAttendance(@PathVariable String userId) throws JsonProcessingException, FileNotFoundException, JRException {
 
         SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat formatPeriode = new SimpleDateFormat("MMMM yyyy");
@@ -184,7 +169,7 @@ public class SpringBootJasperReportApplication {
             String username = user.getUserFullname();
             System.out.println("username: " + username);
 
-            service.exportReport(reportList, userId, username, division, periode); //enable after test
+//            service.exportReport(reportList, userId, username, division, periode); //enable after test
             System.out.println("list: " + reportList);
 
             jsonObject.put("attendanceList", jsonArray);
@@ -197,10 +182,9 @@ public class SpringBootJasperReportApplication {
             header.set(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=attendanceReport.xlsx");
             header.setContentLength(data.length);
 
-            return new HttpEntity<byte[]>(data, header);
-
+            return new HttpEntity<>(data, header);
+//            return new HttpEntity<byte[]>(data, header);
         } catch (SQLException e) {
-            e.printStackTrace();
         }
         
         return null;

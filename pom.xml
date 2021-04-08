@@ -11,6 +11,10 @@
     <groupId>com.javatechie</groupId>
     <artifactId>spring-boot-jasper-report</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    
+    <!-- build war -->
+    <packaging>war</packaging>
+    
     <name>spring-boot-jasper-report</name>
     <description>Demo project for Spring Boot report generation using JasperReport</description>
 
@@ -35,7 +39,6 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.23</version>
             <type>jar</type>
         </dependency>
                 
@@ -62,6 +65,12 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
         
+<!--        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
+        </dependency>-->
+        
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -76,6 +85,7 @@
     </dependencies>
 
     <build>
+        <finalName>hadirreport</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
