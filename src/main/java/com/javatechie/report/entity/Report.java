@@ -16,75 +16,68 @@ import java.util.Date;
 
 public class Report {
     
-    private Date date;
-    private Date start;
-    private Date end;
-    private Date totalHour;
-    private String status;
-    private String remark;
+    private Date attendance_date;
+    private String start;
+    private String end;
+    private String total_hour;
+    private String attendance_status_name;
+    private String attendance_remark;
 
-    public Report() {
+    public Date getAttendance_date() {
+        return attendance_date;
     }
 
-
-    public Report(Date date, Date start, Date end, Date totalHour, String status, String remark) {
-        this.date = date;
-        this.start = start;
-        this.end = end;
-        this.totalHour = totalHour;
-        this.status = status;
-        this.remark = remark;
+    public void setAttendance_date(Date attendance_date) {
+        this.attendance_date = attendance_date;
     }
 
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    public Date getStart() {
+    public String getStart() {
         return start;
     }
 
-    public void setStart(Date start) {
+    public void setStart(String start) {
         this.start = start;
     }
 
-    public Date getEnd() {
+    public String getEnd() {
         return end;
     }
 
-    public void setEnd(Date end) {
+    public void setEnd(String end) {
         this.end = end;
     }
 
-    public Date getTotalHour() {
-        return totalHour;
+    public String getTotal_hour() {
+        return total_hour;
     }
 
-    public void setTotalHour(Date totalHour) {
-        this.totalHour = totalHour;
+    public void setTotal_hour(String total_hour) {
+        this.total_hour = total_hour;
     }
 
-    public String getStatus() {
-        return status;
+    public String getAttendance_status_name() {
+        return attendance_status_name;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setAttendance_status_name(String attendance_status_name) {
+        this.attendance_status_name = attendance_status_name;
     }
 
-    public String getRemark() {
-        return remark;
+    public String getAttendance_remark() {
+        return attendance_remark;
     }
 
-    public void setRemark(String remark) {
-        this.remark = remark;
+    public void setAttendance_remark(String attendance_remark) {
+        this.attendance_remark = attendance_remark;
     }
+
+    @Override
+    public String toString() {
+        return "Report{" + "attendance_date=" + attendance_date + ", start=" + start + ", end=" + end + ", total_hour=" + total_hour + ", attendance_status_name=" + attendance_status_name + ", attendance_remark=" + attendance_remark + '}';
+    }
+
     
+
     
-    
-    
+
 }

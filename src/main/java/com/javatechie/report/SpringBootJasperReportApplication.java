@@ -1,9 +1,15 @@
 package com.javatechie.report;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.javatechie.report.entity.Attendance;
 import com.javatechie.report.entity.Employee;
+import com.javatechie.report.entity.Report;
+import com.javatechie.report.entity.Users;
 import com.javatechie.report.repository.AttendanceRepository;
 import com.javatechie.report.repository.EmployeeRepository;
+import com.javatechie.report.repository.UsersRepository;
 import com.javatechie.report.service.ReportService;
 
 import net.sf.jasperreports.engine.JRException;
@@ -15,10 +21,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.FileNotFoundException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -38,8 +40,12 @@ public class SpringBootJasperReportApplication {
 
     @Autowired
     private EmployeeRepository repository;
+    
     @Autowired
     private ReportService service;
+    
+    @Autowired
+    private UsersRepository usersRepository;
 
     @Autowired
     private AttendanceRepository attendanceRepository;
@@ -49,11 +55,10 @@ public class SpringBootJasperReportApplication {
     private static final String PASSWORD = "Metrodata.5";
 
     @GetMapping("/getAttendancenew/{userId}")
-//    public List<Attendance> getAttendanceByUserId(@PathVariable String userId){
-    public String getAttendance(@PathVariable String userId) {
+    public String getAttendance(@PathVariable String userId) throws JsonProcessingException, FileNotFoundException, JRException {
 
-//        List<Attendance> attendances = attendanceRepository.findAttendanceByUserId(userId);
         SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat formatPeriode = new SimpleDateFormat("MMMM yyyy");
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.MONTH, -1);
         Date lastMonth = cal.getTime();
@@ -92,28 +97,12 @@ public class SpringBootJasperReportApplication {
 
         String startDate = formater.format(firstDate);
         String endDate = formater.format(lastDate);
+//        String startDate = "2021-04-01";
+//        String endDate = "2021-04-30";
 
         System.out.println("startdate: " + startDate);
         System.out.println("enddate: " + endDate);
-//        List<Report> attendances = attendanceRepository.getReport(userId, startDate, endDate);
-//        System.out.println("attendance"+attendances);
-//        
-//        JSONArray jSONArray = new JSONArray();
-//        JSONObject jSONObject2 = new JSONObject();
-//
-//        for(Report att : attendances){
-//            JSONObject jsonobject = new JSONObject();
-//            jsonobject.put("date", att.getDate().toString());
-//            jsonobject.put("start", att.getStart().toString());
-//            
-//            jsonobject.put("end", att.getEnd().toString());
-//            jsonobject.put("totalHour", att.getTotalHour().toString());
-//            jsonobject.put("status", att.getStatus());
-//            jsonobject.put("remark", att.getRemark());
-//            jSONArray.add(jsonobject);
-//        }
-//        jSONObject2.put("attendance", jSONArray);
-//        return jSONObject2.toJSONString();
+
 
         String query = "SELECT s.attendance_date AS date, time_format(s.attendance_time, \"%H:%i\") as start, "
                 + "time_format( e.attendance_time , \"%H:%i\") as end, "
@@ -148,12 +137,6 @@ public class SpringBootJasperReportApplication {
             while (resultset.next()) {
                 JSONObject jsonObjectWhile = new JSONObject();
 
-//                String weekNo = resultset.getString("weekNo");
-//                String leaveNumber = resultset.getString("leaveNumber");
-
-//                System.out.println(weekNo);
-//                System.out.println(leaveNumber);
-
                 jsonObjectWhile.put("attendance_date", resultset.getString("date"));
                 jsonObjectWhile.put("start", resultset.getString("start"));
                 jsonObjectWhile.put("end", resultset.getString("end"));
@@ -162,7 +145,25 @@ public class SpringBootJasperReportApplication {
                 jsonObjectWhile.put("attendance_remark", resultset.getString("remark"));
                 jsonArray.add(jsonObjectWhile);
             }
+            
+            String json = jsonArray.toString();
+            System.out.println("json: "+json);
+            
+            final ObjectMapper objectMapper = new ObjectMapper();
+            List<Report> reportList = objectMapper.readValue(json, new TypeReference<List<Report>>(){});
 
+            System.out.println("userId: "+userId);
+            String periode = formatPeriode.format(lastMonth);
+            System.out.println("periode: "+periode);
+            Users user = usersRepository.findUserById(userId);
+            String division = user.getDivisionId().getDivisionName();
+            System.out.println("division: "+division);
+            String username = user.getUserFullname();
+            System.out.println("username: "+username);
+            
+            service.exportReport(reportList, userId, username, division, periode); //enable after test
+            System.out.println("list: "+reportList);
+            
             jsonObject.put("attendanceList", jsonArray);
 
             return jsonObject.toJSONString();
@@ -236,6 +237,7 @@ public class SpringBootJasperReportApplication {
             jsonobject.put("remark", att.getAttendanceRemark());
             jSONArray.add(jsonobject);
         }
+        
         jSONObject2.put("attendance", jSONArray);
         return jSONObject2.toJSONString();
     }
@@ -246,10 +248,10 @@ public class SpringBootJasperReportApplication {
         return repository.findAll();
     }
 
-    @GetMapping("/report/{format}")
-    public String generateReport(@PathVariable String format) throws FileNotFoundException, JRException {
-        return service.exportReport(format);
-    }
+//    @GetMapping("/report/{format}")
+//    public String generateReport(@PathVariable String format) throws FileNotFoundException, JRException {
+//        return service.exportReport(format);
+//    }
 
     public static void main(String[] args) {
         SpringApplication.run(SpringBootJasperReportApplication.class, args);
