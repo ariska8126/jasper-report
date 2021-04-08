@@ -28,49 +28,68 @@ public class ReportService {
 
     @Autowired
     private EmployeeRepository repository;
-    
+
     @Autowired
     private AttendanceRepository attendanceRepository;
 
-
     public String exportReport(List<Report> attendances, String id, String name, String div,
-    String periode) throws FileNotFoundException, JRException {
+            //    public byte[] exportReport(List<Report> attendances, String id, String name, String div,
+            String periode) throws FileNotFoundException, JRException {
 
         String path = "D:\\Deploy";
         String reportFormat = "pdf";
 
-        System.out.println("list: "+attendances);
+        System.out.println("list: " + attendances);
 
         File file = ResourceUtils.getFile("classpath:employees.jrxml");
-        
+
         JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
-        
+
         JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(attendances);
-        
+
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("userId", id);
         parameters.put("username", name);
         parameters.put("division", div);
         parameters.put("periode", periode);
-        
+
         JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
-        
+
         if (reportFormat.equalsIgnoreCase("html")) {
             JasperExportManager.exportReportToHtmlFile(jasperPrint, path + "\\attendance.html");
         }
         if (reportFormat.equalsIgnoreCase("pdf")) {
+//            getReportXlsx(jasperPrint);
+//            System.out.println("running xlsx");
             JasperExportManager.exportReportToPdfFile(jasperPrint, path + "\\attendance.pdf");
+            System.out.println("report generated in path : " + path);
         }
-        
-        getReportXlsx(jasperPrint);
-        System.out.println("byte: "+getReportXlsx(jasperPrint));
+
+//        getReportXlsx(jasperPrint);
+//        System.out.println("byte: "+getReportXlsx(jasperPrint));
         return "report generated in path : " + path;
     }
-    
-    public byte[] getReportXlsx(final JasperPrint jasperPrint) throws RuntimeException {
+
+    public byte[] getReportXlsx(List<Report> attendances, String id, String name, String div,
+            String periode) throws RuntimeException, FileNotFoundException, JRException {
+        
+        File file = ResourceUtils.getFile("classpath:employees.jrxml");
+
+        JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
+
+        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(attendances);
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("userId", id);
+        parameters.put("username", name);
+        parameters.put("division", div);
+        parameters.put("periode", periode);
+
+        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
+
+        System.out.println("running xlsx");
         final JRXlsxExporter xlsxExporter = new JRXlsxExporter();
         final byte[] rawBytes;
-        System.out.println("running export xlsx");
 
         try (final ByteArrayOutputStream xlsReport = new ByteArrayOutputStream()) {
             xlsxExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
