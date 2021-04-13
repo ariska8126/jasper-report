@@ -19,7 +19,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.awt.*;
 import javax.annotation.Resource;
+import javax.swing.ImageIcon;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
@@ -31,9 +34,8 @@ public class ReportService {
     @Autowired
     private EmployeeRepository repository;
 
-    @Value("classpath:/mii-logo.png")
-    Resource image;
-
+//    @Value("classpath:/mii-logo.png")
+//    Resource image;
     @Autowired
     private AttendanceRepository attendanceRepository;
 
@@ -76,9 +78,10 @@ public class ReportService {
     }
 
     public byte[] getReportXlsx(List<Report> attendances, String id, String name, String div,
-            String periode) throws RuntimeException, FileNotFoundException, JRException {
+            String periode, String fileType, String approver, String checker) throws RuntimeException, FileNotFoundException, JRException {
 
-        File file = ResourceUtils.getFile("classpath:employees.jrxml");
+//        File file = ResourceUtils.getFile("classpath:employees.jrxml");
+        File file = ResourceUtils.getFile("classpath:Simple_Blue.jrxml");
 
         JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
 
@@ -89,24 +92,44 @@ public class ReportService {
         parameters.put("username", name);
         parameters.put("division", div);
         parameters.put("periode", periode);
-        parameters.put("image", image);
+        parameters.put("diperiksa", checker);
+        parameters.put("disetujui", approver);
+//        parameters.put("image", this.getSer
 
         JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
 
-        System.out.println("running xlsx");
-        final JRXlsxExporter xlsxExporter = new JRXlsxExporter();
-        final byte[] rawBytes;
+        byte[] rawBytes = null;
 
-        try (final ByteArrayOutputStream xlsReport = new ByteArrayOutputStream()) {
-            xlsxExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
-            xlsxExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(xlsReport));
-            xlsxExporter.exportReport();
+        if ("xlsx".equals(fileType)) {
 
-            rawBytes = xlsReport.toByteArray();
-        } catch (JRException | IOException e) {
-            throw new RuntimeException(e);
+            System.out.println("running xlsx");
+            final JRXlsxExporter xlsxExporter = new JRXlsxExporter();
+
+            try (final ByteArrayOutputStream xlsReport = new ByteArrayOutputStream()) {
+                xlsxExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+                xlsxExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(xlsReport));
+                xlsxExporter.exportReport();
+
+                rawBytes = xlsReport.toByteArray();
+            } catch (JRException | IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        } else if ("pdf".equals(fileType)) {
+
+            System.out.println("running pdf");
+
+            JRPdfExporter pdfExporter = new JRPdfExporter();
+
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+            pdfExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+            pdfExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(bos));
+            pdfExporter.exportReport();
+
+            rawBytes = bos.toByteArray();
+
         }
-
         return rawBytes;
     }
 }

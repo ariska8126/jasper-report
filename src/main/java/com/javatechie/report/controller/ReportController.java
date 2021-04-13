@@ -1,67 +1,65 @@
-package com.javatechie.report;
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.javatechie.report.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.javatechie.report.entity.Attendance;
-import com.javatechie.report.entity.Employee;
 import com.javatechie.report.entity.Report;
 import com.javatechie.report.entity.Users;
-import com.javatechie.report.repository.AttendanceRepository;
-import com.javatechie.report.repository.EmployeeRepository;
 import com.javatechie.report.repository.UsersRepository;
 import com.javatechie.report.service.ReportService;
-
-import net.sf.jasperreports.engine.JRException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
-
+import io.swagger.annotations.Api;
 import java.io.FileNotFoundException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import net.sf.jasperreports.engine.JRException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-@SpringBootApplication
+/**
+ *
+ * @author herli
+ */
 @RestController
-public class SpringBootJasperReportApplication {
-
-    @Autowired
-    private EmployeeRepository repository;
-
-    @Autowired
-    private ReportService service;
-
+@RequestMapping("/api/transac/report")
+@Api(tags="Report")
+public class ReportController {
+    
     @Autowired
     private UsersRepository usersRepository;
-
+    
     @Autowired
-    private AttendanceRepository attendanceRepository;
-
+    private ReportService service;
+    
     private static final String URL = "jdbc:mysql://localhost:3306/hadir_db";
     private static final String USERNAME = "root";
     private static final String PASSWORD = "Metrodata.5";
-
+    
     @GetMapping(value = "/getAttendancenew/{userId}", produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     @ResponseBody
-    public HttpEntity<byte[]> getReportXlsx(@PathVariable String userId,
+    public HttpEntity<byte[]> getXlsx(@PathVariable String userId,
             final HttpServletResponse response) throws RuntimeException,
             JsonProcessingException, FileNotFoundException, JRException {
 
@@ -196,86 +194,6 @@ public class SpringBootJasperReportApplication {
         return null;
 
     }
-
-    @GetMapping("/getAttendance/{userId}")
-//    public List<Attendance> getAttendanceByUserId(@PathVariable String userId){
-    public String getAttendanceByUserId(@PathVariable String userId) {
-
-//        List<Attendance> attendances = attendanceRepository.findAttendanceByUserId(userId);
-        SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd");
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MONTH, -1);
-        Date lastMonth = cal.getTime();
-        String lM = formater.format(lastMonth);
-        System.out.println("last month: " + lM);
-
-        Calendar lastDateCal = Calendar.getInstance();
-        lastDateCal.add(Calendar.MONTH, -1);
-
-        Calendar firstDateCal = Calendar.getInstance();
-        firstDateCal.add(Calendar.MONTH, -1);
-
-        int lastDateInt = cal.getActualMaximum(Calendar.DATE);
-        int firstDateInt = cal.getActualMinimum(Calendar.DATE);
-
-        System.out.println("first date: " + firstDateInt);
-        System.out.println("last date: " + lastDateInt);
-
-        lastDateCal.set(Calendar.DAY_OF_MONTH, lastDateInt);
-        lastDateCal.set(Calendar.HOUR_OF_DAY, 23);
-        lastDateCal.set(Calendar.MINUTE, 59);
-        lastDateCal.set(Calendar.SECOND, 59);
-        lastDateCal.set(Calendar.MILLISECOND, 0);
-
-        firstDateCal.set(Calendar.DAY_OF_MONTH, firstDateInt);
-        firstDateCal.set(Calendar.HOUR_OF_DAY, 0);
-        firstDateCal.set(Calendar.MINUTE, 0);
-        firstDateCal.set(Calendar.SECOND, 0);
-        firstDateCal.set(Calendar.MILLISECOND, 1);
-
-        Date lastDate = lastDateCal.getTime();
-        Date firstDate = firstDateCal.getTime();
-
-        System.out.println("fisrt date: " + firstDate);
-        System.out.println("last date: " + lastDate);
-
-        String startDate = formater.format(firstDate);
-        String endDate = formater.format(lastDate);
-
-        System.out.println("startdate: " + startDate);
-        System.out.println("enddate: " + endDate);
-        List<Attendance> attendances = attendanceRepository.findLastMonthAttendanceByUserId(userId, startDate, endDate);
-        System.out.println("attendance" + attendances);
-
-        JSONArray jSONArray = new JSONArray();
-        JSONObject jSONObject2 = new JSONObject();
-
-        for (Attendance att : attendances) {
-            JSONObject jsonobject = new JSONObject();
-            jsonobject.put("date", att.getAttendanceDate().toString());
-            jsonobject.put("time", att.getAttendanceTime().toString());
-            jsonobject.put("working", att.getAttendanceType());
-            jsonobject.put("status", att.getAttendanceStatusId().getAttendanceStatusName());
-            jsonobject.put("remark", att.getAttendanceRemark());
-            jSONArray.add(jsonobject);
-        }
-
-        jSONObject2.put("attendance", jSONArray);
-        return jSONObject2.toJSONString();
-    }
-
-    @GetMapping("/getEmployees")
-    public List<Employee> getEmployees() {
-
-        return repository.findAll();
-    }
-
-//    @GetMapping("/report/{format}")
-//    public String generateReport(@PathVariable String format) throws FileNotFoundException, JRException {
-//        return service.exportReport(format);
-//    }
-    public static void main(String[] args) {
-        SpringApplication.run(SpringBootJasperReportApplication.class, args);
-    }
-
+    
+    
 }
