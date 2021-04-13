@@ -102,7 +102,7 @@ public class ReportService {
 
         if ("xlsx".equals(fileType)) {
 
-            System.out.println("running xlsx");
+            System.out.println("creating xlsx");
             final JRXlsxExporter xlsxExporter = new JRXlsxExporter();
 
             try (final ByteArrayOutputStream xlsReport = new ByteArrayOutputStream()) {

@@ -22,5 +22,4 @@ com\javatechie\report\entity\Division.class
 com\javatechie\report\repository\AttendanceRepository.class
 com\javatechie\report\entity\Employee.class
 com\javatechie\report\SpringBootJasperReportApplication.class
-com\javatechie\report\SpringBootJasperReportApplication$1.class
 com\javatechie\report\entity\AttendanceStatus.class
